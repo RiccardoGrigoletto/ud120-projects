@@ -15,7 +15,7 @@ from time import time
 sys.path.append("../tools/")
 from email_preprocess import preprocess
 
-
+from class_vis import prettyPicture
 ### features_train and features_test are the features for the training
 ### and testing datasets, respectively
 ### labels_train and labels_test are the corresponding item labels
@@ -27,7 +27,20 @@ features_train, features_test, labels_train, labels_test = preprocess()
 #########################################################
 ### your code goes here ###
 
+from sklearn.naive_bayes import GaussianNB
 
+gnb = GaussianNB()
+
+t0 = time()
+classify = gnb.fit(features_train,labels_train)
+print ("training time:%f%s"%(round(time()-t0, 3),"s"))
+
+t0 = time()
+pred = classify.predict(features_test)
+print ("prediction time:%f%s"%(round(time()-t0, 3),"s"))
+
+print ("accuracy: %f"%classify.score(features_test,labels_test))
+#prettyPicture(classify,features_test,labels_test)
 #########################################################
 
 
