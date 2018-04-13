@@ -14,3 +14,5 @@ my_feature_list.pkl
 naive_bayes/test\.png
 
 naive_bayes/\.vscode/launch\.json
+.vscode/settings.json
+*.json

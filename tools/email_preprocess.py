@@ -9,7 +9,7 @@ from sklearn.feature_selection import SelectPercentile, f_classif
 
 
 
-def preprocess(words_file = "../tools/word_data.pkl", authors_file="../tools/email_authors.pkl"):
+def preprocess(words_file = "../tools/word_data_unix.pkl", authors_file="../tools/email_authors.pkl"):
     """ 
         this function takes a pre-made list of email texts (by default word_data.pkl)
         and the corresponding authors (by default email_authors.pkl) and performs
@@ -49,16 +49,20 @@ def preprocess(words_file = "../tools/word_data.pkl", authors_file="../tools/ema
     features_test_transformed  = vectorizer.transform(features_test)
 
 
-
     ### feature selection, because text is super high dimensional and 
     ### can be really computationally chewy as a result
     selector = SelectPercentile(f_classif, percentile=10)
     selector.fit(features_train_transformed, labels_train)
     features_train_transformed = selector.transform(features_train_transformed).toarray()
     features_test_transformed  = selector.transform(features_test_transformed).toarray()
-
+    # for i in features_test_transformed:
+    #     print(i[0])
+    
     ### info on the data
     print ("no. of Chris training emails: %d"%sum(labels_train))
     print ("no. of Sara training emails:%d"%(len(labels_train)-sum(labels_train)))
+
+    print ("no. of Chris tests emails: %d"%sum(labels_test))
+    print ("no. of Sara tests emails:%d"%(len(labels_test)-sum(labels_test)))
     
     return features_train_transformed, features_test_transformed, labels_train, labels_test
