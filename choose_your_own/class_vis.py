@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pylab as pl
 
-def prettyPicture(clf, X_test, y_test):
+def prettyPicture(clf, X_test, y_test,name="test"):
     x_min = 0.0; x_max = 1.0
     y_min = 0.0; y_max = 1.0
     
@@ -29,11 +29,10 @@ def prettyPicture(clf, X_test, y_test):
 
     plt.scatter(grade_sig, bumpy_sig, color = "b", label="fast")
     plt.scatter(grade_bkg, bumpy_bkg, color = "r", label="slow")
-    plt.legend()
     plt.xlabel("bumpiness")
     plt.ylabel("grade")
 
-    plt.savefig("test.png")
+    plt.savefig(name+".png")
 
 import base64
 import json
@@ -46,5 +45,5 @@ def output_image(name, format, bytes):
     data['name'] = name
     data['format'] = format
     data['bytes'] = base64.encodestring(bytes)
-    print image_start+json.dumps(data)+image_end
+    print (image_start+json.dumps(data)+image_end)
                                     

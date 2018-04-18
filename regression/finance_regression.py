@@ -17,7 +17,7 @@ import sys
 import pickle
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
-dictionary = pickle.load( open("../final_project/final_project_dataset_modified.pkl", "r") )
+dictionary = pickle.load( open("../final_project/final_project_dataset_modified.pkl", "rb") )
 
 ### list the features you want to look at--first item in the 
 ### list will be the "target" feature
@@ -29,7 +29,7 @@ target, features = targetFeatureSplit( data )
 from sklearn.cross_validation import train_test_split
 feature_train, feature_test, target_train, target_test = train_test_split(features, target, test_size=0.5, random_state=42)
 train_color = "b"
-test_color = "b"
+test_color = "r"
 
 
 
@@ -39,9 +39,17 @@ test_color = "b"
 ### "r" to differentiate training points from test points.
 
 
+from sklearn import linear_model
+from sklearn.metrics import mean_squared_error, r2_score
 
-
-
+reg = linear_model.LinearRegression()
+reg.fit(feature_train,target_train)
+pred = reg.predict(feature_test)
+print("Mean squared error: %.2f"
+      % mean_squared_error(target_test,pred))
+# Explained variance score: 1 is perfect prediction
+print('Variance score: %.2f' % r2_score(target_test, pred))
+print("slope (coef): %f\nintercept: %f"%(reg.coef_,reg.intercept_))
 
 
 
@@ -64,6 +72,9 @@ try:
     plt.plot( feature_test, reg.predict(feature_test) )
 except NameError:
     pass
+reg.fit(feature_test, target_test)
+print(reg.coef_)
+plt.plot(feature_train, reg.predict(feature_train), color="r") 
 plt.xlabel(features_list[1])
 plt.ylabel(features_list[0])
 plt.legend()
