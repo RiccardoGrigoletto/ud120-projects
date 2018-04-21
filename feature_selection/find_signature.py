@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import pickle
 import numpy
@@ -10,8 +10,8 @@ numpy.random.seed(42)
 ### mini-project.
 words_file = "../text_learning/your_word_data.pkl" 
 authors_file = "../text_learning/your_email_authors.pkl"
-word_data = pickle.load( open(words_file, "r"))
-authors = pickle.load( open(authors_file, "r") )
+word_data = pickle.load( open(words_file, "rb"))
+authors = pickle.load( open(authors_file, "rb") )
 
 
 
@@ -28,7 +28,6 @@ vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
 features_train = vectorizer.fit_transform(features_train)
 features_test  = vectorizer.transform(features_test).toarray()
 
-
 ### a classic way to overfit is to use a small number
 ### of data points and a large number of features;
 ### train on only 150 events to put ourselves in this regime
@@ -38,6 +37,17 @@ labels_train   = labels_train[:150]
 
 
 ### your code goes here
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
 
+clf = DecisionTreeClassifier(min_samples_split=40)
+clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+print ("Accuracy: %.4f"%accuracy_score(labels_test, pred))
 
-
+print ("Important features:")
+for index, importance in enumerate(clf.feature_importances_):
+    if importance>0.2:
+        print ("feature no: %d"%index)        
+        print ("importance: %.4f"%importance)
+        print ("word: %s"%vectorizer.get_feature_names()[index])
