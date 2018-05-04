@@ -16,3 +16,5 @@ naive_bayes/test\.png
 naive_bayes/\.vscode/launch\.json
 .vscode/settings.json
 *.json
+
+final_project/dataset

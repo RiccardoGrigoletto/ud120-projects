@@ -22,9 +22,11 @@ from poi_email_addresses import poiEmails
 enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "rb"))
 
 poi = []
+notPoi = []
 email_addresses_counter = 0
 total_payments_counter = 0
 total_poi_payments_counter = 0
+total_not_poi_payments_counter = 0
 max_total_payments = {"person":"","total_payments":0}
 max_exercised_stock_options = {"person":"","exercised_stock_options":0}
 min_exercised_stock_options = {"person":"","exercised_stock_options":-1}
@@ -35,6 +37,7 @@ salaries = []
 for person_name in enron_data:
     if (person_name != "TOTAL"):
         if (enron_data[person_name]["poi"]==1): poi.append(enron_data[person_name])
+        else: notPoi.append(enron_data[person_name])
         if (isinstance(enron_data[person_name]["total_payments"],int)):
             if (max_total_payments["total_payments"] < enron_data[person_name]["total_payments"]): 
                 max_total_payments["person"] = person_name
@@ -79,8 +82,11 @@ print("total_payments_counter: %f (percent)"%(len(total_payments)*100/len(enron_
 print("total_payments_counter: %f "%(len(total_payments)))
 
 for tp in poi:
-    if tp["total_payments"]: total_poi_payments_counter+=1
+    if isinstance(tp["total_payments"],int): total_poi_payments_counter+=1
 print("total_poi_payments_counter: %f (percent)"%(total_poi_payments_counter*100/len(poi)))
+for tp in notPoi:
+    if isinstance(tp["total_payments"],int): total_not_poi_payments_counter+=1
+print("total_non_poi_payments_counter: %f (percent)"%(total_not_poi_payments_counter*100/len(notPoi)))
 
 print("max_total_payments :")
 print(max_total_payments)

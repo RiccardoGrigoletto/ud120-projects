@@ -5,7 +5,7 @@ import sys
 import matplotlib.pyplot
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
-
+from outlier_removal_regression
 
 ### read in data dictionary, convert to numpy array
 data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "rb") )
