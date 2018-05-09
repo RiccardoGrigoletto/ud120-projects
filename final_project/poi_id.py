@@ -4,7 +4,6 @@ import sys
 import pickle
 import matplotlib.pyplot
 import numpy as np
-from functions import *
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data,test_classifier
@@ -14,7 +13,7 @@ from tester import dump_classifier_and_data,test_classifier
 ### The first feature must be "poi".
 # ['poi','salary','to_messages','deferral_payments','total_payments','exercised_stock_options','bonus','restricted_stock','shared_receipt_with_poi','restricted_stock_deferred','total_stock_value','expenses','loan_advances','from_messages','other','from_this_person_to_poi','director_fees','deferred_income','long_term_incentive','email_address','from_poi_to_this_person']
 features_list = ['poi','salary','total_payments','exercised_stock_options','bonus','restricted_stock','shared_receipt_with_poi','total_stock_value','expenses','loan_advances','from_messages','other','from_this_person_to_poi','director_fees','deferred_income','long_term_incentive','from_poi_to_this_person'] # You will need to use more features
-financial_features_list = ['poi','salary','deferral_payments','shared_receipt_with_poi','total_payments','exercised_stock_options','bonus','restricted_stock','restricted_stock_deferred','total_stock_value','expenses','loan_advances','other','director_fees','deferred_income','long_term_incentive','shared_receipt_with_poi']
+financial_features_list = ['poi','salary','deferral_payments','total_payments','exercised_stock_options','bonus','restricted_stock','restricted_stock_deferred','total_stock_value','expenses','loan_advances','other','director_fees','deferred_income','long_term_incentive','shared_receipt_with_poi']
 email_features_list = ['poi','to_messages','shared_receipt_with_poi','from_messages','from_this_person_to_poi','from_poi_to_this_person'] #'email_address'
 
 ### Load the dictionary containing the dataset
@@ -22,10 +21,6 @@ with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 2: Remove outliers
-data_dict.pop("TOTAL") # TOTAL is not a person, it's the sum of the features
-data_dict.pop("THE TRAVEL AGENCY IN THE PARK")
-data_dict = deleteOutliers(data_dict,featureFormat(data_dict, financial_features_list, sort_keys = True))
-
 def deleteOutliers(dictionary,financial_data,contamination=0.02):
     from feature_format import targetFeatureSplit
     financial_labels, financlial_features = targetFeatureSplit(financial_data)
@@ -37,6 +32,12 @@ def deleteOutliers(dictionary,financial_data,contamination=0.02):
             print("REMOVING: %s: "%key)
             del dictionary[key]
     return dictionary
+
+data_dict.pop("TOTAL") # TOTAL is not a person, it's the sum of the features
+data_dict.pop("THE TRAVEL AGENCY IN THE PARK")
+data_dict = deleteOutliers(data_dict,featureFormat(data_dict, features_list, sort_keys = True))
+
+
     
 financial_data = featureFormat(data_dict, financial_features_list, sort_keys = True)
 from sklearn.preprocessing import MinMaxScaler
@@ -89,8 +90,6 @@ financial_features_list.append('to_poi_ratio')
 from sklearn.model_selection import train_test_split
 selected_data = featureFormat(data_dict, financial_features_list, sort_keys = True)
 
-scale(selected_data)
-
 # Using isolation forest to remove outliers, 
 # split data
 selected_labels, selected_features = targetFeatureSplit(selected_data)
@@ -99,26 +98,31 @@ X_selected_train, X_selected_test, y_selected_train, y_selected_test = train_tes
 from sklearn.decomposition import PCA
 pca = PCA(svd_solver='randomized',n_components=2)
 
-pca.fit([x[:-3] for x in X_selected_train],y_selected_train)
-X_pca_train = pca.transform([x[:-3] for x in X_selected_train])
-X_pca_test = pca.transform([x[:-3] for x in X_selected_test])
-
+features_to_save = 3
+if (features_to_save > 0):
+    pca.fit([x[:-features_to_save] for x in X_selected_train],y_selected_train)
+    X_pca_train = pca.transform([x[:-features_to_save] for x in X_selected_train])
+    X_pca_test = pca.transform([x[:-features_to_save] for x in X_selected_test])
+else:
+    pca.fit(X_selected_train,y_selected_train)
+    X_pca_train = pca.transform(X_selected_train)
+    X_pca_test = pca.transform(X_selected_test)
 pca_components = sorted(enumerate(pca.components_[1]),key=lambda x : abs(x[1]),reverse=True)
 
-X_pca_train = np.c_[X_pca_train,np.zeros(len(X_pca_train))]
-X_pca_train = np.c_[X_pca_train,np.zeros(len(X_pca_train))]
-X_pca_train = np.c_[X_pca_train,np.zeros(len(X_pca_train))]
+for c in range(features_to_save):
+    if c != 0:
+        X_pca_train = np.c_[X_pca_train,np.zeros(len(X_pca_train))]
 for i,t in enumerate(X_selected_train):
-    X_pca_train[i][-3] = t[-3]
-    X_pca_train[i][-2] = t[-2]
-    X_pca_train[i][-1] = t[-1]
-X_pca_test = np.c_[X_pca_test,np.zeros(len(X_pca_test))]
-X_pca_test = np.c_[X_pca_test,np.zeros(len(X_pca_test))]
-X_pca_test = np.c_[X_pca_test,np.zeros(len(X_pca_test))]
+    for c in range(features_to_save):
+        if c != 0:
+         X_pca_train[i][-c] = t[-c]
+for c in range(features_to_save):
+    if c != 0:
+        X_pca_test = np.c_[X_pca_test,np.zeros(len(X_pca_test))]
 for i,t in enumerate(X_selected_test):
-    X_pca_test[i][-3] = t[-3]
-    X_pca_test[i][-2] = t[-2]
-    X_pca_test[i][-1] = t[-1]
+    for c in range(features_to_save):
+        if c != 0:
+            X_pca_test[i][-c] = t[-c]
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -136,7 +140,7 @@ features_list = financial_features_list
 selected_features_list = ['poi',financial_features_list[pca_components[0][0]],financial_features_list[pca_components[1][0]],'shared_receipt_with_poi','from_poi_ratio','to_poi_ratio']
 
 from sklearn.tree import DecisionTreeClassifier
-clf = DecisionTreeClassifier(max_depth=10)
+clf = DecisionTreeClassifier()
 clf.fit(X_train,y_train)
 pred = clf.predict(X_test)
 
@@ -150,6 +154,34 @@ pred = clf.predict(X_test)
 # Example starting point. Try investigating other evaluation techniques!
 test_classifier(clf,data_dict,selected_features_list)
 
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier(weights='distance',n_neighbors=2)
+clf.fit(X_train,y_train)
+pred = clf.predict(X_test)
+test_classifier(clf,data_dict,selected_features_list)
+
+from sklearn.svm import LinearSVC
+clf = LinearSVC()
+clf.fit(X_train,y_train)
+pred = clf.predict(X_test)
+test_classifier(clf,data_dict,selected_features_list)
+
+from sklearn.svm import SVC
+clf = SVC()
+clf.fit(X_train,y_train)
+pred = clf.predict(X_test)
+test_classifier(clf,data_dict,selected_features_list)
+
+from sklearn.grid_search import GridSearchCV
+param_grid = {
+        'C': [1e3, 5e3, 1e4, 5e4, 1e5],
+        'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1],
+        }
+# for sklearn version 0.16 or prior, the class_weight parameter value is 'auto'
+clf = GridSearchCV(SVC(kernel='rbf', class_weight='balanced'), param_grid)
+clf.fit(X_train,y_train)
+pred = clf.predict(X_test)
+test_classifier(clf,data_dict,selected_features_list)
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and
