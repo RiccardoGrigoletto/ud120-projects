@@ -140,7 +140,7 @@ features_list = financial_features_list
 selected_features_list = ['poi',financial_features_list[pca_components[0][0]],financial_features_list[pca_components[1][0]],'shared_receipt_with_poi','from_poi_ratio','to_poi_ratio']
 
 from sklearn.tree import DecisionTreeClassifier
-clf = DecisionTreeClassifier()
+clf = DecisionTreeClassifier(max_depth=5)
 clf.fit(X_train,y_train)
 pred = clf.predict(X_test)
 
@@ -156,31 +156,30 @@ test_classifier(clf,data_dict,selected_features_list)
 
 from sklearn.neighbors import KNeighborsClassifier
 clf = KNeighborsClassifier(weights='distance',n_neighbors=2)
-clf.fit(X_train,y_train)
-pred = clf.predict(X_test)
 test_classifier(clf,data_dict,selected_features_list)
 
 from sklearn.svm import LinearSVC
 clf = LinearSVC()
-clf.fit(X_train,y_train)
-pred = clf.predict(X_test)
 test_classifier(clf,data_dict,selected_features_list)
 
-from sklearn.svm import SVC
-clf = SVC()
-clf.fit(X_train,y_train)
-pred = clf.predict(X_test)
-test_classifier(clf,data_dict,selected_features_list)
+# from sklearn.svm import SVC
+# clf = SVC()
+# clf.fit(X_train,y_train)
+# test_classifier(clf,data_dict,selected_features_list)
 
-from sklearn.grid_search import GridSearchCV
-param_grid = {
-        'C': [1e3, 5e3, 1e4, 5e4, 1e5],
-        'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1],
-        }
-# for sklearn version 0.16 or prior, the class_weight parameter value is 'auto'
-clf = GridSearchCV(SVC(kernel='rbf', class_weight='balanced'), param_grid)
-clf.fit(X_train,y_train)
-pred = clf.predict(X_test)
+# from sklearn.grid_search import GridSearchCV
+# param_grid = {
+#         'C': [1e3, 5e3, 1e4, 5e4, 1e5],
+#         'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1],
+#         }
+# # for sklearn version 0.16 or prior, the class_weight parameter value is 'auto'
+# clf = GridSearchCV(SVC(kernel='rbf', class_weight='balanced'), param_grid)
+# clf.fit(X_train,y_train)
+#
+# test_classifier(clf,data_dict,selected_features_list)
+
+from sklearn.ensemble import RandomForestClassifier
+clf = RandomForestClassifier()
 test_classifier(clf,data_dict,selected_features_list)
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
